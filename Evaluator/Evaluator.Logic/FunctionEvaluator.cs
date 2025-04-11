@@ -4,24 +4,25 @@ public class FunctionEvaluator
 {
     public static double Evalute(string infix)
     {
-        var postfix = ToPostfix(infix);
-        return Calculate(postfix);
+        var postfixStr = ToPostfix(infix);
+        var tokens = postfixStr.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
+        return Calculate(tokens);
     }
 
-    private static double Calculate(string postfix)
+    private static double Calculate(List<string> postfix)
     {
         var stack = new Stack<double>();
         foreach (var item in postfix)
         {
-            if (IsOperator(item))
+            if (IsSingleOperator(item))
             {
                 var operator2 = stack.Pop();
                 var operator1 = stack.Pop();
-                stack.Push(Result(operator1, item, operator2));
+                stack.Push(Result(operator1, item[0], operator2));
             }
             else
             {
-                stack.Push(char.GetNumericValue(item));
+                stack.Push(double.Parse(item));
             }
         }
         return stack.Pop();
@@ -44,48 +45,69 @@ public class FunctionEvaluator
     {
         var stack = new Stack<char>();
         var postfix = string.Empty;
+        var number = string.Empty;
+
         foreach (var item in infix)
         {
-            if (IsOperator(item))
+            if (char.IsDigit(item) || item == '.')
             {
+                number += item;
+            }
+            else if (IsOperator(item))
+            {
+
+                if (!string.IsNullOrEmpty(number))
+                {
+                    postfix += number + " ";
+                    number = String.Empty;
+                }
+
                 if (stack.Count == 0)
                 {
                     stack.Push(item);
                 }
+                else if (item == ')')
+                {
+                    do
+                    {
+                        postfix += stack.Pop() + " ";
+                    } while (stack.Peek() != '(');
+                    stack.Pop();
+                }
                 else
                 {
-                    if (item == ')')
+
+                    if (PriorityExpression(item) > PriorityStack(stack.Peek()))
                     {
-                        do
-                        {
-                            postfix += stack.Pop();
-                        } while (stack.Peek() != '(');
-                        stack.Pop();
+                        stack.Push(item);
                     }
                     else
                     {
-                        if (PriorityExpression(item) > PriorityStack(stack.Peek()))
-                        {
-                            stack.Push(item);
-                        }
-                        else
-                        {
-                            postfix += stack.Pop();
-                            stack.Push(item);
-                        }
+                        postfix += stack.Pop() + " ";
+                        stack.Push(item);
                     }
                 }
             }
-            else
+            else if (item == ' ')
             {
-                postfix += item;
+
+                continue;
             }
         }
-        do
+
+
+        if (!string.IsNullOrEmpty(number))
         {
-            postfix += stack.Pop();
-        } while (stack.Count > 0);
-        return postfix;
+            postfix += number + " ";
+        }
+
+
+        while (stack.Count > 0)
+        {
+            postfix += stack.Pop() + " ";
+        }
+
+        return postfix.Trim();
     }
 
     private static int PriorityStack(char item)
@@ -117,4 +139,8 @@ public class FunctionEvaluator
     }
 
     private static bool IsOperator(char item) => "()^*/+-".IndexOf(item) >= 0;
+    private static bool IsSingleOperator(string s)
+    {
+        return s.Length == 1 && IsOperator(s[0]);
+    }
 }
