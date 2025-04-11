@@ -12,17 +12,17 @@ public class FunctionEvaluator
     private static double Calculate(List<string> postfix)
     {
         var stack = new Stack<double>();
-        foreach (var item in postfix)
+        foreach (var token in postfix)
         {
-            if (IsSingleOperator(item))
+            if (IsSingleOperator(token))
             {
                 var operator2 = stack.Pop();
                 var operator1 = stack.Pop();
-                stack.Push(Result(operator1, item[0], operator2));
+                stack.Push(Result(operator1, token[0], operator2));
             }
             else
             {
-                stack.Push(double.Parse(item));
+                stack.Push(double.Parse(token));
             }
         }
         return stack.Pop();
