@@ -296,7 +296,7 @@ namespace Evaluator.UI.Windows
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = Color.Silver;
+            BackColor = Color.Black;
             ClientSize = new Size(649, 524);
             Controls.Add(bdel);
             Controls.Add(bcle);
